@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODG Interiors · 2026 Project Database</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --paper: #FFFFFF;
+  --paper-raised: #FFFFFF;
+  --ink: #141414;
+  --ink-soft: #8A8A8A;
+  --line: #E8E8E8;
+  --blue: #141414;
+  --blue-dark: #000000;
+  --brass: #9A9A9A;
+  --brass-soft: #F2F2F2;
+
+  --olivia-dot:#D8688C;   --olivia-fill:#FBE7EF; --olivia-line:#EFB9CE;
+  --daniela-dot:#4F9B6B;  --daniela-fill:#E7F5EA; --daniela-line:#B9DDC4;
+  --charlene-dot:#C98A3D; --charlene-fill:#FBEEDE; --charlene-line:#E8C79A;
+  --jinny-dot:#8B63B0;    --jinny-fill:#F1E8F7; --jinny-line:#D3BCE6;
+  --dana-dot:#4A7FA6;     --dana-fill:#E6F0F7; --dana-line:#B7D3E6;
+  --undetermined-dot:#808080; --undetermined-fill:#EFEFEF; --undetermined-line:#D4D4D4;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Jost', sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+::selection{ background:var(--brass-soft); }
+
+/* ---------- layout shell ---------- */
+.wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:48px 32px 96px;
+}
+
+/* ---------- login screen ---------- */
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.login-card{
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:40px 36px;
+  max-width:380px;
+  width:100%;
+  text-align:center;
+}
+.login-title{
+  font-family:'Jost', sans-serif;
+  font-weight:500;
+  text-transform:uppercase;
+  font-size:22px;
+  letter-spacing:0.02em;
+  margin:14px 0 8px;
+}
+.login-sub{
+  font-size:13.5px;
+  color:var(--ink-soft);
+  margin:0 0 22px;
+  line-height:1.5;
+}
+.login-card input{
+  width:100%;
+  font-family:'Jost', sans-serif;
+  font-size:14px;
+  padding:11px 14px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  outline:none;
+  margin-bottom:14px;
+  text-align:center;
+}
+.login-card input:focus{ border-color:var(--ink); }
+.login-card button{
+  width:100%;
+  font-family:'Jost', sans-serif;
+  font-weight:500;
+  font-size:14px;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  padding:11px 14px;
+  border-radius:8px;
+  border:none;
+  background:var(--ink);
+  color:#fff;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.login-card button:hover{ background:var(--blue-dark); }
+.login-card button:disabled{ opacity:0.5; cursor:not-allowed; }
+.login-error{
+  margin-top:14px;
+  font-size:12.5px;
+  color:#A33B3B;
+  min-height:16px;
+}
+
+/* ---------- header ---------- */
+.eyebrow{
+  font-family:'Jost', sans-serif;
+  font-size:12px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--brass);
+  font-weight:600;
+  margin-bottom:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.eyebrow::before{
+  content:'';
+  width:22px; height:1px;
+  background:var(--brass);
+  display:inline-block;
+}
+
+h1.title{
+  font-family:'Jost', sans-serif;
+  font-weight:500;
+  text-transform:uppercase;
+  font-size:clamp(28px, 4.2vw, 44px);
+  line-height:1.12;
+  letter-spacing:0.01em;
+  margin:0 0 10px;
+}
+h1.title em{
+  font-style:normal;
+  font-weight:300;
+  color:var(--ink);
+}
+
+.subtitle{
+  font-size:15.5px;
+  color:var(--ink-soft);
+  max-width:560px;
+  line-height:1.55;
+  margin:0 0 36px;
+}
+
+/* ---------- stacked distribution bar (hero thesis) ---------- */
+.distribution{
+  border:1px solid var(--line);
+  background:var(--paper-raised);
+  border-radius:10px;
+  padding:20px 22px 18px;
+  margin-bottom:40px;
+}
+.distribution-label{
+  font-family:'Jost', sans-serif;
+  font-size:11px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+}
+.dist-bar{
+  display:flex;
+  width:100%;
+  height:14px;
+  border-radius:7px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  margin-bottom:14px;
+}
+.dist-seg{ height:100%; transition:opacity .2s ease; }
+.dist-seg:hover{ opacity:.72; cursor:default; }
+.dist-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+}
+.dist-item{
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  font-size:13px;
+  color:var(--ink-soft);
+}
+.dist-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; position:relative; top:1px; }
+.dist-item b{ color:var(--ink); font-weight:600; }
+.dist-item .n{ font-family:'Jost', sans-serif; font-size:12px; }
+
+/* ---------- controls ---------- */
+.controls{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:28px;
+  position:sticky;
+  top:0;
+  background:linear-gradient(var(--paper) 78%, transparent);
+  padding:14px 0 16px;
+  z-index:10;
+}
+.chip{
+  font-family:'Jost', sans-serif;
+  font-size:13.5px;
+  font-weight:600;
+  padding:8px 15px;
+  border-radius:100px;
+  border:1px solid var(--line);
+  background:var(--paper-raised);
+  color:var(--ink-soft);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  transition:all .15s ease;
+  white-space:nowrap;
+}
+.chip:hover{ border-color:var(--ink-soft); color:var(--ink); }
+.chip.active{
+  background:var(--ink);
+  border-color:var(--ink);
+  color:var(--paper);
+}
+.chip .dot{ width:8px; height:8px; border-radius:50%; }
+.chip .count{
+  font-family:'Jost', sans-serif;
+  font-size:11px;
+  opacity:.7;
+}
+
+.search-wrap{
+  margin-left:auto;
+  position:relative;
+}
+.search-wrap input{
+  font-family:'Jost', sans-serif;
+  font-size:13.5px;
+  padding:9px 14px 9px 34px;
+  border-radius:100px;
+  border:1px solid var(--line);
+  background:var(--paper-raised);
+  color:var(--ink);
+  width:220px;
+  outline:none;
+  transition:border-color .15s ease, width .2s ease;
+}
+.search-wrap input:focus{ border-color:var(--blue); width:260px; }
+.search-wrap svg{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:14px; height:14px; color:var(--ink-soft); pointer-events:none;
+}
+
+.export-btn{
+  background:#3F7D58 !important;
+  border-color:#3F7D58 !important;
+  color:#fff !important;
+}
+.export-btn:hover{ background:#2F6344 !important; }
+.export-btn svg{ flex-shrink:0; }
+.export-btn.loading{ opacity:0.6; pointer-events:none; }
+
+.result-count{
+  font-family:'Jost', sans-serif;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin:-14px 0 22px;
+}
+
+/* ---------- grid ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+  gap:16px;
+}
+
+.card{
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-left:4px solid var(--card-line, var(--ink));
+  border-radius:8px;
+  padding:18px 18px 16px;
+  cursor:pointer;
+  transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  position:relative;
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px -12px rgba(35,40,45,0.22);
+}
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+.card-name{
+  font-family:'Jost', sans-serif;
+  font-weight:500;
+  text-transform:uppercase;
+  font-size:15px;
+  line-height:1.3;
+  letter-spacing:0.02em;
+}
+.card-team{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-family:'Jost', sans-serif;
+  font-size:10.5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:3px 8px 3px 6px;
+  border-radius:100px;
+  font-weight:600;
+}
+.card-team .dot{ width:6px; height:6px; border-radius:50%; }
+
+.card-address{
+  font-family:'Jost', sans-serif;
+  font-size:12px;
+  color:var(--ink-soft);
+  line-height:1.4;
+}
+
+.card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:2px;
+}
+.tag{
+  font-size:11px;
+  padding:3px 9px;
+  border-radius:5px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  color:var(--ink-soft);
+  font-weight:500;
+}
+.tag.phase{ color:var(--ink); border-color:var(--ink); background:#F2F2F2; font-weight:600; }
+
+.card-foot{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-top:auto;
+  padding-top:10px;
+  border-top:1px dashed var(--line);
+  font-size:11.5px;
+  color:var(--ink-soft);
+}
+.card-foot .install{
+  font-family:'Jost', sans-serif;
+  color:var(--ink);
+  font-weight:500;
+}
+
+.empty-state{
+  text-align:center;
+  padding:80px 20px;
+  color:var(--ink-soft);
+}
+.empty-state .glyph{
+  font-family:'Jost', sans-serif;
+  font-size:44px;
+  color:var(--line);
+  margin-bottom:10px;
+}
+
+/* ---------- modal / spec sheet ---------- */
+.overlay{
+  position:fixed; inset:0;
+  background:rgba(29,51,64,0.42);
+  backdrop-filter:blur(2px);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:5vh 20px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+  z-index:100;
+  overflow-y:auto;
+}
+.overlay.open{ opacity:1; pointer-events:auto; }
+
+.sheet{
+  background:var(--paper-raised);
+  border-radius:14px;
+  max-width:640px;
+  width:100%;
+  padding:0;
+  transform:translateY(10px);
+  transition:transform .18s ease;
+  box-shadow:0 30px 60px -20px rgba(20,25,30,0.35);
+  overflow:hidden;
+}
+.overlay.open .sheet{ transform:translateY(0); }
+
+.sheet-head{
+  padding:28px 30px 20px;
+  border-bottom:3px solid var(--ink);
+  position:relative;
+  background:var(--sheet-fill, var(--paper));
+}
+.sheet-close{
+  position:absolute; top:22px; right:24px;
+  width:30px; height:30px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:var(--paper-raised);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  color:var(--ink-soft);
+  font-size:16px;
+  line-height:1;
+  transition:all .12s ease;
+}
+.sheet-close:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+.sheet-eyebrow{
+  font-family:'Jost', sans-serif;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.sheet-eyebrow .dot{ width:8px; height:8px; border-radius:50%; }
+.team-select{
+  font-family:'Jost', sans-serif;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  font-weight:600;
+  border:none;
+  background:transparent;
+  padding:2px 4px;
+  margin:0 -4px;
+  border-radius:4px;
+  cursor:pointer;
+  border-bottom:1px dashed var(--ink-soft);
+}
+.team-select:hover{ background:#F2F2F2; }
+.team-select:focus{ outline:none; border-bottom-color:var(--ink); }
+
+.sheet-title{
+  font-family:'Jost', sans-serif;
+  font-weight:500;
+  text-transform:uppercase;
+  font-size:24px;
+  line-height:1.2;
+  letter-spacing:0.02em;
+  padding-right:40px;
+}
+
+.sheet-body{
+  padding:24px 30px 30px;
+  max-height:64vh;
+  overflow-y:auto;
+}
+
+.spec-group{ margin-bottom:22px; }
+.spec-group:last-child{ margin-bottom:0; }
+.spec-group-label{
+  font-family:'Jost', sans-serif;
+  font-size:10.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--brass);
+  font-weight:600;
+  margin-bottom:10px;
+}
+.spec-row{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  padding:7px 0;
+  border-bottom:1px dotted var(--line);
+  font-size:13.5px;
+}
+.spec-row:last-child{ border-bottom:none; }
+.spec-label{
+  font-family:'Jost', sans-serif;
+  font-size:11.5px;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  flex-shrink:0;
+  width:168px;
+}
+.spec-value{
+  color:var(--ink);
+  font-weight:500;
+  text-align:right;
+  margin-left:auto;
+  line-height:1.4;
+}
+.spec-value.empty{ color:var(--line); font-weight:400; font-style:italic; }
+.spec-value.long{ text-align:left; margin-left:0; }
+
+.spec-row.editable .spec-value{
+  cursor:text;
+  border-bottom:1px dashed transparent;
+  transition:border-color .12s ease, background .12s ease;
+  padding:2px 4px;
+  border-radius:3px;
+}
+.spec-row.editable .spec-value:hover{
+  border-color:var(--ink-soft);
+  background:#FAFAFA;
+}
+.spec-value[contenteditable="true"]{
+  outline:none;
+  border-color:var(--ink) !important;
+  background:#F7F7F7 !important;
+  cursor:text;
+}
+.spec-value[contenteditable]:empty::before{
+  content: attr(data-placeholder);
+  color: var(--line);
+  font-style: italic;
+}
+
+.save-toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--ink);
+  color:#fff;
+  font-size:12.5px;
+  letter-spacing:0.04em;
+  padding:10px 18px;
+  border-radius:100px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+  z-index:200;
+}
+.save-toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.save-toast.error{ background:#A33B3B; }
+
+.sync-note{
+  font-size:11px;
+  color:var(--ink-soft);
+  letter-spacing:0.04em;
+  margin:-10px 0 20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.sync-note .dot{ width:6px; height:6px; border-radius:50%; background:#4F9B6B; flex-shrink:0; }
+
+body.locked{ overflow:hidden; }
+
+.footer{
+  margin-top:56px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  text-align:right;
+  font-size:11px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+
+@media (max-width:640px){
+  .wrap{ padding:32px 18px 72px; }
+  .controls{ position:static; background:none; }
+  .search-wrap{ margin-left:0; width:100%; }
+  .search-wrap input{ width:100%; }
+  .spec-label{ width:120px; }
+  .sheet{ border-radius:10px; }
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="eyebrow">ODG Interiors &middot; 2026 Project Database</div>
+    <h2 class="login-title">Team Access</h2>
+    <p class="login-sub">Enter the shared password to view the project database.</p>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+    <button id="login-btn">Enter</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
+
+<div class="wrap" id="main-app" style="display:none;">
+
+  <div class="eyebrow">ODG Interiors &middot; 2026 Project Database</div>
+  <h1 class="title">Twenty-six projects,<br><em>five teams</em>, one board.</h1>
+  <p class="subtitle">Every active project across the studio, organized by project manager. Filter by team, search by name or client, or open a card for the full spec sheet.</p>
+
+  <div class="distribution">
+    <div class="distribution-label">
+      <span>Projects by team</span>
+      <span id="dist-total"></span>
+    </div>
+    <div class="dist-bar" id="dist-bar"></div>
+    <div class="dist-legend" id="dist-legend"></div>
+  </div>
+
+  <div class="controls" id="controls">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="search" placeholder="Search project, client, address…">
+    </div>
+    <button class="chip export-btn" id="export-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
+      Export to Excel
+    </button>
+  </div>
+
+  <div class="result-count" id="result-count"></div>
+  <div class="sync-note" id="sync-note"><span class="dot" style="background:#C9C9C9"></span>Connecting to Firestore&hellip;</div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">Ohara Davies-Gaetano</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+let BASE_DATA = []; // populated after login from Firestore (pipeline/base-data)
+
+function prepareBaseData(){
+  BASE_DATA.forEach((r) => { r._id = r['Project Name']; });
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCCr2fHe9XaYuhXn0lS4_cvjrQPpkl-4Zc",
+  authDomain: "project-database-2026.firebaseapp.com",
+  databaseURL: "https://project-database-2026-default-rtdb.firebaseio.com",
+  projectId: "project-database-2026",
+  storageBucket: "project-database-2026.firebasestorage.app",
+  messagingSenderId: "321517900577",
+  appId: "1:321517900577:web:e98dec228ba1fb0aa72460"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const overridesDocRef = db.collection('pipeline').doc('overrides');
+const baseDataDocRef = db.collection('pipeline').doc('base-data');
+const SHARED_LOGIN_EMAIL = 'studio@odg-interiors.com';
+
+let overrides = {};
+let DATA = [];
+
+function rebuildData(){
+  DATA = BASE_DATA.map(r => ({ ...r, ...(overrides[r._id] || {}) }));
+}
+
+function initFirestoreSync(){
+  overridesDocRef.onSnapshot((snap) => {
+    overrides = snap.exists ? (snap.data() || {}) : {};
+    rebuildData();
+    setSyncNote('Live &middot; connected to Firestore', false);
+    renderDistribution();
+    renderChips();
+    renderGrid();
+  }, (error) => {
+    console.error(error);
+    setSyncNote('Connection issue &mdash; edits may not sync. Check Firestore rules/config.', true);
+  });
+}
+
+async function saveOverride(id, field, value){
+  try{
+    await overridesDocRef.set({ [id]: { [field]: value } }, { merge: true });
+    showToast('Saved');
+  }catch(e){
+    console.error(e);
+    showToast('Could not save — check Firestore connection', true);
+  }
+}
+
+function setSyncNote(html, isWarn){
+  const el = document.getElementById('sync-note');
+  if(!el) return;
+  el.innerHTML = `<span class="dot" style="background:${isWarn ? '#C98A3D' : '#4F9B6B'}"></span>${html}`;
+}
+
+function showToast(msg, isError){
+  let t = document.getElementById('toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'save-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.className = 'save-toast show' + (isError ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.classList.remove('show'); }, 1800);
+}
+
+const TEAMS = {
+  'Olivia':  { dot:'var(--olivia-dot)',   fill:'var(--olivia-fill)',   line:'var(--olivia-line)' },
+  'Daniela': { dot:'var(--daniela-dot)',  fill:'var(--daniela-fill)',  line:'var(--daniela-line)' },
+  'Charlene':{ dot:'var(--charlene-dot)', fill:'var(--charlene-fill)', line:'var(--charlene-line)' },
+  'Jinny':   { dot:'var(--jinny-dot)',    fill:'var(--jinny-fill)',    line:'var(--jinny-line)' },
+  'Dana':    { dot:'var(--dana-dot)',     fill:'var(--dana-fill)',     line:'var(--dana-line)' },
+  'Undetermined': { dot:'var(--undetermined-dot)', fill:'var(--undetermined-fill)', line:'var(--undetermined-line)' },
+};
+const TEAM_ORDER = ['Olivia','Daniela','Charlene','Jinny','Dana','Undetermined'];
+
+let activeTeam = 'All';
+let searchTerm = '';
+
+function esc(s){
+  if(s===null||s===undefined) return '';
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function val(v){ return (v===null||v===undefined||v==='') ? null : v; }
+function fmtMoney(v){
+  if(v===null) return null;
+  if(typeof v === 'number') return '$' + v.toLocaleString('en-US');
+  return v;
+}
+function fmtPct(v){
+  if(v===null) return null;
+  if(typeof v === 'number') return (v*100).toFixed(1).replace(/\.0$/,'') + '%';
+  return v;
+}
+function displayName(name){
+  // shorten "STRAND/GARCIA / Strand Beach" -> keep full, but tidy multi "/ " joins for card title
+  return name;
+}
+
+/* ---------- distribution bar ---------- */
+function renderDistribution(){
+  const counts = {};
+  TEAM_ORDER.forEach(t => counts[t] = 0);
+  DATA.forEach(r => counts[r.Team] = (counts[r.Team]||0) + 1);
+  const total = DATA.length;
+  document.getElementById('dist-total').textContent = total + ' total';
+
+  const bar = document.getElementById('dist-bar');
+  bar.innerHTML = TEAM_ORDER.map(t => {
+    const pct = (counts[t]/total*100).toFixed(2);
+    return `<div class="dist-seg" style="width:${pct}%; background:${TEAMS[t].dot}" title="${t}: ${counts[t]}"></div>`;
+  }).join('');
+
+  const legend = document.getElementById('dist-legend');
+  legend.innerHTML = TEAM_ORDER.map(t => `
+    <div class="dist-item">
+      <span class="dist-dot" style="background:${TEAMS[t].dot}"></span>
+      <b>${t}</b><span class="n">${counts[t]}</span>
+    </div>
+  `).join('');
+}
+
+/* ---------- filter chips ---------- */
+function renderChips(){
+  const counts = {};
+  TEAM_ORDER.forEach(t => counts[t] = 0);
+  DATA.forEach(r => counts[r.Team] = (counts[r.Team]||0) + 1);
+
+  const controls = document.getElementById('controls');
+  const existing = controls.querySelectorAll('.chip:not(#export-btn)');
+  existing.forEach(e => e.remove());
+  const searchWrap = controls.querySelector('.search-wrap');
+
+  const allChip = document.createElement('button');
+  allChip.className = 'chip' + (activeTeam==='All' ? ' active' : '');
+  allChip.innerHTML = `All <span class="count">${DATA.length}</span>`;
+  allChip.onclick = () => { activeTeam='All'; renderChips(); renderGrid(); };
+  controls.insertBefore(allChip, searchWrap);
+
+  TEAM_ORDER.forEach(t => {
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (activeTeam===t ? ' active' : '');
+    chip.innerHTML = `<span class="dot" style="background:${TEAMS[t].dot}"></span>${t} <span class="count">${counts[t]}</span>`;
+    chip.onclick = () => { activeTeam=t; renderChips(); renderGrid(); };
+    controls.insertBefore(chip, searchWrap);
+  });
+}
+
+/* ---------- grid ---------- */
+function matchesSearch(r, term){
+  if(!term) return true;
+  const hay = [r['Project Name'], r['Client'], r['Address'], r['Project Manager - Name']]
+    .map(x => (x||'').toLowerCase()).join(' ');
+  return hay.includes(term.toLowerCase());
+}
+
+function renderGrid(){
+  let rows = DATA.filter(r => (activeTeam==='All' || r.Team===activeTeam) && matchesSearch(r, searchTerm));
+  if(activeTeam === 'All'){
+    rows = rows.slice().sort((a,b) => TEAM_ORDER.indexOf(a.Team) - TEAM_ORDER.indexOf(b.Team));
+  }
+
+  document.getElementById('result-count').textContent =
+    rows.length === DATA.length ? '' : `Showing ${rows.length} of ${DATA.length}`;
+
+  const grid = document.getElementById('grid');
+  if(rows.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="glyph">—</div>
+      <div>No projects match that search.</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = rows.map((r, i) => {
+    const team = TEAMS[r.Team] || TEAMS['Olivia'];
+    const phase = val(r['Current Phase']);
+    const install = val(r['Project Install Date']);
+    const pm = val(r['Project Manager - Name']);
+    const idx = DATA.indexOf(r);
+    return `
+      <div class="card" style="--card-line:${team.dot}" onclick="openSheet(${idx})">
+        <div class="card-top">
+          <div class="card-name">${esc(r['Project Name'])}</div>
+          <div class="card-team" style="background:${team.fill}; color:${team.dot}">
+            <span class="dot" style="background:${team.dot}"></span>${esc(r.Team)}
+          </div>
+        </div>
+        ${r['Address'] ? `<div class="card-address">${esc(r['Address'])}</div>` : ''}
+        <div class="card-meta">
+          ${r['Project Type'] ? `<span class="tag">${esc(r['Project Type'])}</span>` : ''}
+          ${phase ? `<span class="tag phase">${esc(phase)}</span>` : ''}
+        </div>
+        <div class="card-foot">
+          <span>${pm ? 'PM ' + esc(pm) : ''}</span>
+          <span class="install">${install ? esc(install) : '—'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- detail sheet ---------- */
+const FIELD_GROUPS = [
+  { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style'] },
+  { label:'Scope & budget', fields:['Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget','Mark-up %','Retainer Schedule'] },
+  { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor',"Owner's Rep"] },
+  { label:'Vendors', fields:['Builder','Architect','Landscape Architect','Lighting Designer'] },
+  { label:'Status', fields:['Current Phase','Next Major Milestone','Project Install Date','How did you find us?'] },
+];
+
+/* ---------- Excel export ---------- */
+const TEAM_HEX = {
+  'Olivia':'FFD9E8', 'Daniela':'D9F2D9', 'Charlene':'FFE0C2',
+  'Jinny':'E6D9F2', 'Dana':'D9EAF7', 'Undetermined':'EFEFEF',
+};
+const MASTER_COLUMNS = ['Client','Family Office','Project Type','Address',
+  'Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget',
+  'Mark-up %','Retainer Schedule','Architectural Style','Project Manager - Name',
+  'Project Designer - Name','Design Assistant - Name',"Owner's Rep",'Builder','Architect',
+  'Landscape Architect','Lighting Designer','Current Phase','Next Major Milestone',
+  'Project Install Date','How did you find us?','Expeditor'];
+const PM_ATTR_FIELDS = FIELD_GROUPS.flatMap(g => g.fields);
+
+function styleHeaderCell(cell){
+  cell.font = { name:'Calibri', bold:true, color:{ argb:'FFFFFFFF' } };
+  cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1F4E78' } };
+  cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+  cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+}
+function styleDataCell(cell, fillHex){
+  cell.font = { name:'Calibri', color:{ argb:'FF000000' } };
+  cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+  cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+  if(fillHex) cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF'+fillHex } };
+}
+
+async function exportToExcel(){
+  const btn = document.getElementById('export-btn');
+  btn.classList.add('loading');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = 'Building file&hellip;';
+  try{
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'ODG Interiors';
+    workbook.created = new Date();
+
+    // ---- master "2026" sheet ----
+    const master = workbook.addWorksheet('2026');
+    const headers = ['Team','Project Name', ...MASTER_COLUMNS];
+    const headerRow = master.addRow(headers);
+    headerRow.eachCell(cell => styleHeaderCell(cell));
+    headerRow.height = 26;
+
+    const sorted = TEAM_ORDER.flatMap(t => DATA.filter(r => r.Team === t));
+    sorted.forEach(r => {
+      const rowVals = [r.Team, r['Project Name'], ...MASTER_COLUMNS.map(f => val(r[f]))];
+      const row = master.addRow(rowVals);
+      const fillHex = TEAM_HEX[r.Team] || 'FFFFFF';
+      row.eachCell({ includeEmpty:true }, cell => styleDataCell(cell, fillHex));
+    });
+
+    headers.forEach((header, i) => {
+      const col = master.getColumn(i+1);
+      col.width = header === 'Retainer Schedule' ? 32 : header === 'Address' ? 22 : header === 'Project Name' ? 26 : 16;
+    });
+    master.views = [{ state:'frozen', ySplit:1 }];
+
+    // ---- one sheet per team, projects as columns (matches original layout) ----
+    for(const team of TEAM_ORDER){
+      const teamRows = DATA.filter(r => r.Team === team);
+      if(teamRows.length === 0) continue;
+      const ws = workbook.addWorksheet(`${team} - 26`.slice(0,31));
+
+      const nameHeader = ws.addRow(['Project Name', ...teamRows.map(r => r['Project Name'])]);
+      nameHeader.eachCell(cell => styleHeaderCell(cell));
+      nameHeader.height = 26;
+
+      PM_ATTR_FIELDS.forEach(field => {
+        const rowVals = [field, ...teamRows.map(r => {
+          const v = val(r[field]);
+          return v === null ? '' : formatField(field, v);
+        })];
+        const row = ws.addRow(rowVals);
+        row.getCell(1).font = { name:'Calibri', bold:true };
+        row.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE7E6E6' } };
+        row.eachCell({ includeEmpty:true }, (cell, colNum) => {
+          cell.alignment = { horizontal: colNum===1 ? 'left':'center', vertical:'middle', wrapText:true };
+          cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+        });
+      });
+
+      ws.getColumn(1).width = 22;
+      for(let c=2; c<=teamRows.length+1; c++){ ws.getColumn(c).width = 24; }
+      ws.views = [{ state:'frozen', xSplit:1, ySplit:1 }];
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ODG_2026_Project_Database.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Excel file downloaded');
+  }catch(e){
+    console.error(e);
+    showToast('Export failed — try again', true);
+  }finally{
+    btn.classList.remove('loading');
+    btn.innerHTML = originalHTML;
+  }
+}
+
+document.getElementById('export-btn').addEventListener('click', exportToExcel);
+
+function formatField(name, v){
+  v = val(v);
+  if(v===null) return null;
+  if(name==='Furniture Budget') return fmtMoney(v);
+  if(name==='Mark-up %') return fmtPct(v);
+  if(name==='Interior Sq. Footage' || name==='Exterior Sq. Footage'){
+    return typeof v === 'number' ? v.toLocaleString('en-US') + ' SF' : v;
+  }
+  return v;
+}
+
+function openSheet(idx){
+  const r = DATA[idx];
+  const team = TEAMS[r.Team] || TEAMS['Olivia'];
+  const sheet = document.getElementById('sheet');
+
+  const groups = FIELD_GROUPS.map(g => {
+    const rowsHtml = g.fields.map(f => {
+      const raw = formatField(f, r[f]);
+      const isLong = raw && String(raw).length > 46;
+      return `
+        <div class="spec-row editable">
+          <div class="spec-label">${esc(f).replace(' - Name','')}</div>
+          <div class="spec-value ${raw ? (isLong?'long':'') : 'empty'}"
+               contenteditable="true"
+               spellcheck="false"
+               data-field="${esc(f)}"
+               data-idx="${idx}"
+               data-placeholder="Not yet set">${raw ? esc(raw) : ''}</div>
+        </div>`;
+    }).join('');
+    return `<div class="spec-group"><div class="spec-group-label">${g.label}</div>${rowsHtml}</div>`;
+  }).join('');
+
+  sheet.innerHTML = `
+    <div class="sheet-head" style="--sheet-fill:${team.fill}">
+      <div class="sheet-close" onclick="closeSheet()">✕</div>
+      <div class="sheet-eyebrow">
+        <span class="dot" id="sheet-team-dot" style="background:${team.dot}"></span>
+        <select class="team-select" id="team-select" data-idx="${idx}">
+          ${TEAM_ORDER.map(t => `<option value="${esc(t)}" ${t===r.Team?'selected':''}>${esc(t)}</option>`).join('')}
+        </select>
+        <span>&#39;s team</span>
+      </div>
+      <div class="sheet-title">${esc(r['Project Name'])}</div>
+    </div>
+    <div class="sheet-body">${groups}</div>
+  `;
+
+  sheet.querySelectorAll('.spec-value[contenteditable]').forEach(el => {
+    el.addEventListener('blur', () => commitEdit(el));
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
+      if(e.key === 'Escape'){ e.preventDefault(); el.blur(); }
+    });
+  });
+
+  sheet.querySelector('#team-select').addEventListener('change', (e) => {
+    changeTeam(idx, e.target.value);
+  });
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.classList.add('locked');
+}
+
+function changeTeam(idx, newTeam){
+  const r = DATA[idx];
+  if(r.Team === newTeam) return;
+  r.Team = newTeam;
+  saveOverride(r._id, 'Team', newTeam);
+
+  const team = TEAMS[newTeam];
+  document.getElementById('sheet-team-dot').style.background = team.dot;
+  document.querySelector('.sheet-head').style.setProperty('--sheet-fill', team.fill);
+  document.querySelector('.sheet-head').style.background = team.fill;
+
+  renderDistribution();
+  renderChips();
+  renderGrid();
+}
+
+function commitEdit(el){
+  const idx = parseInt(el.dataset.idx, 10);
+  const field = el.dataset.field;
+  const r = DATA[idx];
+  const newVal = el.textContent.trim();
+  const oldVal = val(r[field]);
+  const oldDisplay = oldVal !== null ? String(formatField(field, oldVal)) : '';
+
+  el.classList.toggle('empty', newVal === '');
+  if(newVal === oldDisplay) return;
+
+  const storeVal = newVal === '' ? null : newVal;
+  r[field] = storeVal;
+  saveOverride(r._id, field, storeVal);
+  renderGrid();
+}
+
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.classList.remove('locked');
+}
+document.getElementById('overlay').addEventListener('click', e => {
+  if(e.target.id === 'overlay') closeSheet();
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeSheet();
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderGrid();
+});
+
+renderDistribution();
+renderChips();
+renderGrid();
+/* ---------- auth gate ---------- */
+let baseDataLoaded = false;
+
+async function showApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  if(!baseDataLoaded){
+    try{
+      const snap = await baseDataDocRef.get();
+      BASE_DATA = (snap.exists && snap.data().projects) ? snap.data().projects : [];
+      prepareBaseData();
+      baseDataLoaded = true;
+    }catch(e){
+      console.error(e);
+      document.getElementById('main-app').innerHTML =
+        '<div style="padding:60px 20px;text-align:center;color:var(--ink-soft);">Could not load project data. Check Firestore rules/config and refresh.</div>';
+      return;
+    }
+  }
+  initFirestoreSync();
+}
+
+function showLogin(){
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+auth.onAuthStateChanged(user => {
+  if(user){ showApp(); } else { showLogin(); }
+});
+
+document.getElementById('login-btn').addEventListener('click', attemptLogin);
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if(e.key === 'Enter') attemptLogin();
+});
+
+async function attemptLogin(){
+  const pwInput = document.getElementById('login-password');
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  const password = pwInput.value;
+  if(!password){ errEl.textContent = 'Enter the password.'; return; }
+  btn.disabled = true;
+  errEl.textContent = '';
+  try{
+    await auth.signInWithEmailAndPassword(SHARED_LOGIN_EMAIL, password);
+    pwInput.value = '';
+  }catch(e){
+    errEl.textContent = 'Incorrect password — try again.';
+  }finally{
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
