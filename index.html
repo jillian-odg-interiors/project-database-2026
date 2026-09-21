@@ -529,6 +529,29 @@ h1.title em{
 .spec-value.empty{ color:var(--line); font-weight:400; font-style:italic; }
 .spec-value.long{ text-align:left; margin-left:0; }
 
+.spec-value-wrap{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  margin-left:auto;
+  min-width:0;
+}
+.spec-value-wrap .spec-value{ margin-left:0; }
+.spec-value-wrap.long{ margin-left:0; flex:1 1 auto; }
+.spec-value-wrap.long .spec-value{ flex:1 1 auto; }
+.spec-link{
+  flex-shrink:0;
+  color:var(--brass);
+  text-decoration:none;
+  font-size:13px;
+  border:1px solid var(--line);
+  border-radius:50%;
+  width:20px; height:20px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .12s ease;
+}
+.spec-link:hover{ background:var(--ink); border-color:var(--ink); color:#fff; }
+
 .spec-row.editable .spec-value{
   cursor:text;
   border-bottom:1px dashed transparent;
@@ -924,7 +947,11 @@ const FIELD_GROUPS = [
   { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor',"Owner's Rep"] },
   { label:'Vendors', fields:['Builder','Architect','Landscape Architect','Lighting Designer'] },
   { label:'Status', fields:['Current Phase','Next Major Milestone','Project Install Date','How did you find us?'] },
+  { label:'Marketing / Credit List', fields:['Photographer','Stylist','Credit List'] },
 ];
+
+// fields whose value is a URL — rendered with a clickable "open" affordance
+const URL_FIELDS = ['Credit List'];
 
 /* ---------- Excel export ---------- */
 const TEAM_HEX = {
@@ -936,7 +963,7 @@ const MASTER_COLUMNS = ['Client','Family Office','Project Type','Address',
   'Mark-up %','Retainer Schedule','Architectural Style','Project Manager - Name',
   'Project Designer - Name','Design Assistant - Name',"Owner's Rep",'Builder','Architect',
   'Landscape Architect','Lighting Designer','Current Phase','Next Major Milestone',
-  'Project Install Date','How did you find us?','Expeditor'];
+  'Project Install Date','How did you find us?','Expeditor','Photographer','Stylist','Credit List'];
 const PM_ATTR_FIELDS = FIELD_GROUPS.flatMap(g => g.fields);
 
 function styleHeaderCell(cell){
@@ -1055,15 +1082,20 @@ function openSheet(idx){
     const rowsHtml = g.fields.map(f => {
       const raw = formatField(f, r[f]);
       const isLong = raw && String(raw).length > 46;
+      const isUrl = URL_FIELDS.includes(f) && raw && /^(https?:\/\/|www\.)/i.test(String(raw).trim());
+      const href = isUrl ? (/^https?:\/\//i.test(raw) ? raw : 'https://' + raw) : null;
       return `
         <div class="spec-row editable">
           <div class="spec-label">${esc(f).replace(' - Name','')}</div>
-          <div class="spec-value ${raw ? (isLong?'long':'') : 'empty'}"
-               contenteditable="true"
-               spellcheck="false"
-               data-field="${esc(f)}"
-               data-idx="${idx}"
-               data-placeholder="Not yet set">${raw ? esc(raw) : ''}</div>
+          <div class="spec-value-wrap ${isLong ? 'long' : ''}">
+            <div class="spec-value ${raw ? (isLong?'long':'') : 'empty'}"
+                 contenteditable="true"
+                 spellcheck="false"
+                 data-field="${esc(f)}"
+                 data-idx="${idx}"
+                 data-placeholder="${URL_FIELDS.includes(f) ? 'Paste a link' : 'Not yet set'}">${raw ? esc(raw) : ''}</div>
+            ${isUrl ? `<a class="spec-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="Open link" onmousedown="event.stopPropagation()">↗</a>` : ''}
+          </div>
         </div>`;
     }).join('');
     return `<div class="spec-group"><div class="spec-group-label">${g.label}</div>${rowsHtml}</div>`;
