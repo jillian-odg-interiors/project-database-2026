@@ -24,6 +24,7 @@
   --jinny-dot:#8B63B0;    --jinny-fill:#F1E8F7; --jinny-line:#D3BCE6;
   --dana-dot:#4A7FA6;     --dana-fill:#E6F0F7; --dana-line:#B7D3E6;
   --undetermined-dot:#808080; --undetermined-fill:#EFEFEF; --undetermined-line:#D4D4D4;
+  --archived-dot:#A8A29A;     --archived-fill:#F4F2EE;    --archived-line:#DEDAD2;
 }
 
 *{ box-sizing:border-box; }
@@ -272,6 +273,14 @@ h1.title em{
 .export-btn:hover{ background:#2F6344 !important; }
 .export-btn svg{ flex-shrink:0; }
 .export-btn.loading{ opacity:0.6; pointer-events:none; }
+
+.add-btn{
+  background:var(--ink) !important;
+  border-color:var(--ink) !important;
+  color:#fff !important;
+}
+.add-btn:hover{ background:#000 !important; }
+.add-btn svg{ flex-shrink:0; }
 
 .result-count{
   font-family:'Jost', sans-serif;
@@ -632,6 +641,10 @@ body.locked{ overflow:hidden; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input type="text" id="search" placeholder="Search project, client, address…">
     </div>
+    <button class="chip add-btn" id="add-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 5v14M5 12h14"/></svg>
+      Add Project
+    </button>
     <button class="chip export-btn" id="export-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
       Export to Excel
@@ -675,13 +688,21 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const overridesDocRef = db.collection('pipeline').doc('overrides');
 const baseDataDocRef = db.collection('pipeline').doc('base-data');
+const addedProjectsDocRef = db.collection('pipeline').doc('added-projects');
 const SHARED_LOGIN_EMAIL = 'studio@odg-interiors.com';
 
 let overrides = {};
+let addedProjects = {}; // brand-new projects created in-app, keyed by generated id
 let DATA = [];
 
 function rebuildData(){
-  DATA = BASE_DATA.map(r => ({ ...r, ...(overrides[r._id] || {}) }));
+  const fromBase = BASE_DATA.map(r => ({ ...r, ...(overrides[r._id] || {}) }));
+  const fromAdded = Object.keys(addedProjects).map(id => ({
+    ...addedProjects[id],
+    _id: id,
+    ...(overrides[id] || {})
+  }));
+  DATA = [...fromBase, ...fromAdded];
 }
 
 function initFirestoreSync(){
@@ -689,6 +710,17 @@ function initFirestoreSync(){
     overrides = snap.exists ? (snap.data() || {}) : {};
     rebuildData();
     setSyncNote('Live &middot; connected to Firestore', false);
+    renderDistribution();
+    renderChips();
+    renderGrid();
+  }, (error) => {
+    console.error(error);
+    setSyncNote('Connection issue &mdash; edits may not sync. Check Firestore rules/config.', true);
+  });
+
+  addedProjectsDocRef.onSnapshot((snap) => {
+    addedProjects = snap.exists ? (snap.data() || {}) : {};
+    rebuildData();
     renderDistribution();
     renderChips();
     renderGrid();
@@ -705,6 +737,26 @@ async function saveOverride(id, field, value){
   }catch(e){
     console.error(e);
     showToast('Could not save — check Firestore connection', true);
+  }
+}
+
+async function addProject(){
+  const newId = 'proj_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const blank = { Team: 'Undetermined', 'Project Name': 'New Project' };
+  try{
+    await addedProjectsDocRef.set({ [newId]: blank }, { merge: true });
+    showToast('Project added');
+    // the onSnapshot listener above will pick this up and repopulate DATA —
+    // wait for that before trying to open the detail sheet for it
+    const openWhenReady = () => {
+      const idx = DATA.findIndex(r => r._id === newId);
+      if(idx !== -1) openSheet(idx);
+      else setTimeout(openWhenReady, 100);
+    };
+    openWhenReady();
+  }catch(e){
+    console.error(e);
+    showToast('Could not add project — check Firestore connection', true);
   }
 }
 
@@ -735,8 +787,9 @@ const TEAMS = {
   'Jinny':   { dot:'var(--jinny-dot)',    fill:'var(--jinny-fill)',    line:'var(--jinny-line)' },
   'Dana':    { dot:'var(--dana-dot)',     fill:'var(--dana-fill)',     line:'var(--dana-line)' },
   'Undetermined': { dot:'var(--undetermined-dot)', fill:'var(--undetermined-fill)', line:'var(--undetermined-line)' },
+  'Archived': { dot:'var(--archived-dot)', fill:'var(--archived-fill)', line:'var(--archived-line)' },
 };
-const TEAM_ORDER = ['Olivia','Daniela','Charlene','Jinny','Dana','Undetermined'];
+const TEAM_ORDER = ['Olivia','Daniela','Charlene','Jinny','Dana','Undetermined','Archived'];
 
 let activeTeam = 'All';
 let searchTerm = '';
@@ -791,7 +844,7 @@ function renderChips(){
   DATA.forEach(r => counts[r.Team] = (counts[r.Team]||0) + 1);
 
   const controls = document.getElementById('controls');
-  const existing = controls.querySelectorAll('.chip:not(#export-btn)');
+  const existing = controls.querySelectorAll('.chip:not(#export-btn):not(#add-btn)');
   existing.forEach(e => e.remove());
   const searchWrap = controls.querySelector('.search-wrap');
 
@@ -876,7 +929,7 @@ const FIELD_GROUPS = [
 /* ---------- Excel export ---------- */
 const TEAM_HEX = {
   'Olivia':'FFD9E8', 'Daniela':'D9F2D9', 'Charlene':'FFE0C2',
-  'Jinny':'E6D9F2', 'Dana':'D9EAF7', 'Undetermined':'EFEFEF',
+  'Jinny':'E6D9F2', 'Dana':'D9EAF7', 'Undetermined':'EFEFEF', 'Archived':'F4F2EE',
 };
 const MASTER_COLUMNS = ['Client','Family Office','Project Type','Address',
   'Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget',
@@ -980,6 +1033,7 @@ async function exportToExcel(){
 }
 
 document.getElementById('export-btn').addEventListener('click', exportToExcel);
+document.getElementById('add-btn').addEventListener('click', addProject);
 
 function formatField(name, v){
   v = val(v);
