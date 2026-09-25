@@ -25,6 +25,7 @@
   --dana-dot:#4A7FA6;     --dana-fill:#E6F0F7; --dana-line:#B7D3E6;
   --undetermined-dot:#808080; --undetermined-fill:#EFEFEF; --undetermined-line:#D4D4D4;
   --archived-dot:#A8A29A;     --archived-fill:#F4F2EE;    --archived-line:#DEDAD2;
+  --ohara-dot:#8A6D3B;        --ohara-fill:#F3E9D6;       --ohara-line:#E3D2AC;
 }
 
 *{ box-sizing:border-box; }
@@ -828,10 +829,11 @@ const TEAMS = {
   'Charlene':{ dot:'var(--charlene-dot)', fill:'var(--charlene-fill)', line:'var(--charlene-line)' },
   'Jinny':   { dot:'var(--jinny-dot)',    fill:'var(--jinny-fill)',    line:'var(--jinny-line)' },
   'Dana':    { dot:'var(--dana-dot)',     fill:'var(--dana-fill)',     line:'var(--dana-line)' },
+  'Ohara Davies-Gaetano': { dot:'var(--ohara-dot)', fill:'var(--ohara-fill)', line:'var(--ohara-line)' },
   'Undetermined': { dot:'var(--undetermined-dot)', fill:'var(--undetermined-fill)', line:'var(--undetermined-line)' },
   'Archived': { dot:'var(--archived-dot)', fill:'var(--archived-fill)', line:'var(--archived-line)' },
 };
-const TEAM_ORDER = ['Olivia','Daniela','Charlene','Jinny','Dana','Undetermined','Archived'];
+const TEAM_ORDER = ['Olivia','Daniela','Charlene','Jinny','Dana','Ohara Davies-Gaetano','Undetermined','Archived'];
 
 let activeTeam = 'All';
 let searchTerm = '';
@@ -934,7 +936,7 @@ function renderGrid(){
   grid.innerHTML = rows.map((r, i) => {
     const team = TEAMS[r.Team] || TEAMS['Olivia'];
     const phase = val(r['Current Phase']);
-    const owner = fieldValue(r, 'Project Owner');
+    const install = val(r['Project Install Date']);
     const pm = val(r['Project Manager - Name']);
     const idx = DATA.indexOf(r);
     return `
@@ -952,7 +954,7 @@ function renderGrid(){
         </div>
         <div class="card-foot">
           <span>${pm ? 'PM ' + esc(pm) : ''}</span>
-          <span class="install">${owner ? esc(owner) : '—'}</span>
+          <span class="install">${install ? esc(install) : '—'}</span>
         </div>
       </div>
     `;
@@ -961,7 +963,7 @@ function renderGrid(){
 
 /* ---------- detail sheet ---------- */
 const FIELD_GROUPS = [
-  { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style','Project Owner'] },
+  { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style'] },
   { label:'Scope & budget', fields:['Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget','Mark-up %','Retainer Schedule'] },
   { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor',"Owner's Rep"] },
   { label:'Vendors', fields:['Builder','Architect','Landscape Architect','Lighting Designer'] },
@@ -971,17 +973,6 @@ const FIELD_GROUPS = [
 
 // fields whose value is a URL — rendered with a clickable "open" affordance
 const URL_FIELDS = ['Credit List'];
-
-// fields that default to a fixed value when no override/base data has set them
-const DEFAULT_FIELD_VALUES = { 'Project Owner': 'Ohara Davies-Gaetano' };
-
-// returns the field's stored value, or its default (if any) when unset — used
-// everywhere a field is read so the default is consistent across card, sheet, and export
-function fieldValue(r, f){
-  const v = val(r[f]);
-  if(v !== null) return v;
-  return DEFAULT_FIELD_VALUES[f] !== undefined ? DEFAULT_FIELD_VALUES[f] : null;
-}
 
 // fields rendered as a fixed dropdown instead of free text in the detail sheet
 const SELECT_FIELDS = {
@@ -998,7 +989,7 @@ const SELECT_FIELDS = {
 /* ---------- Excel export ---------- */
 const TEAM_HEX = {
   'Olivia':'FFD9E8', 'Daniela':'D9F2D9', 'Charlene':'FFE0C2',
-  'Jinny':'E6D9F2', 'Dana':'D9EAF7', 'Undetermined':'EFEFEF', 'Archived':'F4F2EE',
+  'Jinny':'E6D9F2', 'Dana':'D9EAF7', 'Ohara Davies-Gaetano':'F3E9D6', 'Undetermined':'EFEFEF', 'Archived':'F4F2EE',
 };
 const MASTER_COLUMNS = ['Client','Family Office','Project Type','Address',
   'Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget',
@@ -1040,7 +1031,7 @@ async function exportToExcel(){
 
     const sorted = TEAM_ORDER.flatMap(t => DATA.filter(r => r.Team === t));
     sorted.forEach(r => {
-      const rowVals = [r.Team, r['Project Name'], ...MASTER_COLUMNS.map(f => fieldValue(r, f))];
+      const rowVals = [r.Team, r['Project Name'], ...MASTER_COLUMNS.map(f => val(r[f]))];
       const row = master.addRow(rowVals);
       const fillHex = TEAM_HEX[r.Team] || 'FFFFFF';
       row.eachCell({ includeEmpty:true }, cell => styleDataCell(cell, fillHex));
@@ -1064,7 +1055,7 @@ async function exportToExcel(){
 
       PM_ATTR_FIELDS.forEach(field => {
         const rowVals = [field, ...teamRows.map(r => {
-          const v = fieldValue(r, field);
+          const v = val(r[field]);
           return v === null ? '' : formatField(field, v);
         })];
         const row = ws.addRow(rowVals);
@@ -1124,7 +1115,7 @@ function openSheet(idx){
     const rowsHtml = g.fields.map(f => {
       // dropdown fields (currently just Current Phase) render as a <select>, not free text
       if(SELECT_FIELDS[f]){
-        const current = fieldValue(r, f);
+        const current = val(r[f]);
         return `
           <div class="spec-row">
             <div class="spec-label">${esc(f).replace(' - Name','')}</div>
@@ -1135,7 +1126,7 @@ function openSheet(idx){
           </div>`;
       }
 
-      const raw = formatField(f, fieldValue(r, f));
+      const raw = formatField(f, r[f]);
       const isLong = raw && String(raw).length > 46;
       const isUrl = URL_FIELDS.includes(f) && raw && /^(https?:\/\/|www\.)/i.test(String(raw).trim());
       const href = isUrl ? (/^https?:\/\//i.test(raw) ? raw : 'https://' + raw) : null;
@@ -1214,10 +1205,8 @@ function commitEdit(el){
   const field = el.dataset.field;
   const r = DATA[idx];
   const newVal = el.textContent.trim();
-  // compare against the same fieldValue()-backed display the field was drawn with,
-  // so a default (e.g. Project Owner) isn't spuriously re-saved as an override
-  const oldFormatted = formatField(field, fieldValue(r, field));
-  const oldDisplay = oldFormatted !== null ? String(oldFormatted) : '';
+  const oldVal = val(r[field]);
+  const oldDisplay = oldVal !== null ? String(formatField(field, oldVal)) : '';
 
   el.classList.toggle('empty', newVal === '');
   if(newVal === oldDisplay) return;
