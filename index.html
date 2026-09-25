@@ -473,6 +473,25 @@ h1.title em{
   border-bottom:1px dashed var(--ink-soft);
 }
 .team-select:hover{ background:#F2F2F2; }
+
+.phase-select{
+  font-family:'Jost', sans-serif;
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink);
+  border:none;
+  background:transparent;
+  text-align:right;
+  text-align-last:right;
+  margin-left:auto;
+  padding:2px 4px;
+  border-radius:4px;
+  cursor:pointer;
+  border-bottom:1px dashed var(--ink-soft);
+  max-width:230px;
+}
+.phase-select:hover{ background:#FAFAFA; }
+.phase-select:focus{ outline:none; border-bottom-color:var(--ink); }
 .team-select:focus{ outline:none; border-bottom-color:var(--ink); }
 
 .sheet-title{
@@ -915,7 +934,7 @@ function renderGrid(){
   grid.innerHTML = rows.map((r, i) => {
     const team = TEAMS[r.Team] || TEAMS['Olivia'];
     const phase = val(r['Current Phase']);
-    const install = val(r['Project Install Date']);
+    const owner = fieldValue(r, 'Project Owner');
     const pm = val(r['Project Manager - Name']);
     const idx = DATA.indexOf(r);
     return `
@@ -933,7 +952,7 @@ function renderGrid(){
         </div>
         <div class="card-foot">
           <span>${pm ? 'PM ' + esc(pm) : ''}</span>
-          <span class="install">${install ? esc(install) : '—'}</span>
+          <span class="install">${owner ? esc(owner) : '—'}</span>
         </div>
       </div>
     `;
@@ -942,7 +961,7 @@ function renderGrid(){
 
 /* ---------- detail sheet ---------- */
 const FIELD_GROUPS = [
-  { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style'] },
+  { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style','Project Owner'] },
   { label:'Scope & budget', fields:['Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget','Mark-up %','Retainer Schedule'] },
   { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor',"Owner's Rep"] },
   { label:'Vendors', fields:['Builder','Architect','Landscape Architect','Lighting Designer'] },
@@ -952,6 +971,29 @@ const FIELD_GROUPS = [
 
 // fields whose value is a URL — rendered with a clickable "open" affordance
 const URL_FIELDS = ['Credit List'];
+
+// fields that default to a fixed value when no override/base data has set them
+const DEFAULT_FIELD_VALUES = { 'Project Owner': 'Ohara Davies-Gaetano' };
+
+// returns the field's stored value, or its default (if any) when unset — used
+// everywhere a field is read so the default is consistent across card, sheet, and export
+function fieldValue(r, f){
+  const v = val(r[f]);
+  if(v !== null) return v;
+  return DEFAULT_FIELD_VALUES[f] !== undefined ? DEFAULT_FIELD_VALUES[f] : null;
+}
+
+// fields rendered as a fixed dropdown instead of free text in the detail sheet
+const SELECT_FIELDS = {
+  'Current Phase': [
+    'Phase 1 - Schematic Design',
+    'Phase 2 - Design Development: Construction',
+    'Phase 3 - Design Development: Procurement',
+    'Phase 4 - Construction Administration',
+    'Phase 5 - Procurement',
+    'Phase 6 - Installation'
+  ]
+};
 
 /* ---------- Excel export ---------- */
 const TEAM_HEX = {
@@ -998,7 +1040,7 @@ async function exportToExcel(){
 
     const sorted = TEAM_ORDER.flatMap(t => DATA.filter(r => r.Team === t));
     sorted.forEach(r => {
-      const rowVals = [r.Team, r['Project Name'], ...MASTER_COLUMNS.map(f => val(r[f]))];
+      const rowVals = [r.Team, r['Project Name'], ...MASTER_COLUMNS.map(f => fieldValue(r, f))];
       const row = master.addRow(rowVals);
       const fillHex = TEAM_HEX[r.Team] || 'FFFFFF';
       row.eachCell({ includeEmpty:true }, cell => styleDataCell(cell, fillHex));
@@ -1022,7 +1064,7 @@ async function exportToExcel(){
 
       PM_ATTR_FIELDS.forEach(field => {
         const rowVals = [field, ...teamRows.map(r => {
-          const v = val(r[field]);
+          const v = fieldValue(r, field);
           return v === null ? '' : formatField(field, v);
         })];
         const row = ws.addRow(rowVals);
@@ -1080,7 +1122,20 @@ function openSheet(idx){
 
   const groups = FIELD_GROUPS.map(g => {
     const rowsHtml = g.fields.map(f => {
-      const raw = formatField(f, r[f]);
+      // dropdown fields (currently just Current Phase) render as a <select>, not free text
+      if(SELECT_FIELDS[f]){
+        const current = fieldValue(r, f);
+        return `
+          <div class="spec-row">
+            <div class="spec-label">${esc(f).replace(' - Name','')}</div>
+            <select class="phase-select" data-field="${esc(f)}" data-idx="${idx}">
+              <option value="" ${!current ? 'selected' : ''}>Not yet set</option>
+              ${SELECT_FIELDS[f].map(opt => `<option value="${esc(opt)}" ${current===opt?'selected':''}>${esc(opt)}</option>`).join('')}
+            </select>
+          </div>`;
+      }
+
+      const raw = formatField(f, fieldValue(r, f));
       const isLong = raw && String(raw).length > 46;
       const isUrl = URL_FIELDS.includes(f) && raw && /^(https?:\/\/|www\.)/i.test(String(raw).trim());
       const href = isUrl ? (/^https?:\/\//i.test(raw) ? raw : 'https://' + raw) : null;
@@ -1128,6 +1183,12 @@ function openSheet(idx){
     changeTeam(idx, e.target.value);
   });
 
+  sheet.querySelectorAll('.phase-select').forEach(el => {
+    el.addEventListener('change', (e) => {
+      changeSelectField(idx, e.target.dataset.field, e.target.value);
+    });
+  });
+
   document.getElementById('overlay').classList.add('open');
   document.body.classList.add('locked');
 }
@@ -1153,8 +1214,10 @@ function commitEdit(el){
   const field = el.dataset.field;
   const r = DATA[idx];
   const newVal = el.textContent.trim();
-  const oldVal = val(r[field]);
-  const oldDisplay = oldVal !== null ? String(formatField(field, oldVal)) : '';
+  // compare against the same fieldValue()-backed display the field was drawn with,
+  // so a default (e.g. Project Owner) isn't spuriously re-saved as an override
+  const oldFormatted = formatField(field, fieldValue(r, field));
+  const oldDisplay = oldFormatted !== null ? String(oldFormatted) : '';
 
   el.classList.toggle('empty', newVal === '');
   if(newVal === oldDisplay) return;
@@ -1163,6 +1226,15 @@ function commitEdit(el){
   r[field] = storeVal;
   saveOverride(r._id, field, storeVal);
   renderGrid();
+}
+
+function changeSelectField(idx, field, newValue){
+  const r = DATA[idx];
+  const storeVal = newValue === '' ? null : newValue;
+  if(val(r[field]) === storeVal) return;
+  r[field] = storeVal;
+  saveOverride(r._id, field, storeVal);
+  renderGrid(); // updates the phase tag shown on the card
 }
 
 function closeSheet(){
