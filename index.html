@@ -503,7 +503,12 @@ h1.title em{
   line-height:1.2;
   letter-spacing:0.02em;
   padding-right:40px;
+  cursor:text;
+  border-radius:4px;
+  transition:background .12s ease;
 }
+.sheet-title:hover{ background:rgba(0,0,0,0.035); }
+.sheet-title:focus{ outline:none; background:rgba(0,0,0,0.05); }
 
 .sheet-body{
   padding:24px 30px 30px;
@@ -1157,17 +1162,25 @@ function openSheet(idx){
         </select>
         <span>&#39;s team</span>
       </div>
-      <div class="sheet-title">${esc(r['Project Name'])}</div>
+      <div class="sheet-title"
+           contenteditable="true"
+           spellcheck="false"
+           data-field="Project Name"
+           data-idx="${idx}">${esc(r['Project Name'])}</div>
     </div>
     <div class="sheet-body">${groups}</div>
   `;
 
-  sheet.querySelectorAll('.spec-value[contenteditable]').forEach(el => {
+  sheet.querySelectorAll('.spec-value[contenteditable], .sheet-title[contenteditable]').forEach(el => {
     el.addEventListener('blur', () => commitEdit(el));
     el.addEventListener('keydown', (e) => {
       if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
       if(e.key === 'Escape'){ e.preventDefault(); el.blur(); }
     });
+    // as soon as the person starts typing into an empty field, drop the faint
+    // "unset" placeholder styling so what they type is legible right away —
+    // otherwise it stays that faint color until they tab/click away
+    el.addEventListener('focus', () => el.classList.remove('empty'));
   });
 
   sheet.querySelector('#team-select').addEventListener('change', (e) => {
@@ -1207,6 +1220,12 @@ function commitEdit(el){
   const newVal = el.textContent.trim();
   const oldVal = val(r[field]);
   const oldDisplay = oldVal !== null ? String(formatField(field, oldVal)) : '';
+
+  // a project always needs a name — if it's cleared out, just snap back
+  if(field === 'Project Name' && newVal === ''){
+    el.textContent = oldDisplay;
+    return;
+  }
 
   el.classList.toggle('empty', newVal === '');
   if(newVal === oldDisplay) return;
