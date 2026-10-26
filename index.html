@@ -915,9 +915,17 @@ function renderChips(){
 /* ---------- grid ---------- */
 function matchesSearch(r, term){
   if(!term) return true;
-  const hay = [r['Project Name'], r['Client'], r['Address'], r['Project Manager - Name']]
-    .map(x => (x||'').toLowerCase()).join(' ');
-  return hay.includes(term.toLowerCase());
+  // search across every entry on the project (builder, architect, stylist, phase, team, etc.)
+  const hay = Object.keys(r)
+    .filter(k => k !== '_id')
+    .map(k => {
+      const v = r[k];
+      if(v === null || v === undefined) return '';
+      return String(formatField(k, v) ?? v);
+    })
+    .join(' ')
+    .toLowerCase();
+  return hay.includes(term.trim().toLowerCase());
 }
 
 function renderGrid(){
@@ -970,8 +978,8 @@ function renderGrid(){
 const FIELD_GROUPS = [
   { label:'Overview', fields:['Client','Family Office','Project Type','Address','Architectural Style'] },
   { label:'Scope & budget', fields:['Interior Sq. Footage','Exterior Sq. Footage','Furniture Budget','Hourly Budget','Mark-up %','Retainer Schedule'] },
-  { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor',"Owner's Rep"] },
-  { label:'Vendors', fields:['Builder','Architect','Landscape Architect','Lighting Designer'] },
+  { label:'Team', fields:['Project Manager - Name','Project Designer - Name','Design Assistant - Name','Expeditor'] },
+  { label:'Vendors', fields:["Owner's Rep",'Builder','Architect','Landscape Architect','Lighting Designer'] },
   { label:'Status', fields:['Current Phase','Next Major Milestone','Project Install Date','How did you find us?'] },
   { label:'Marketing / Credit List', fields:['Photographer','Stylist','Credit List'] },
 ];
