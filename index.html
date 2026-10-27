@@ -383,6 +383,34 @@ h1.title em{
   font-weight:500;
 }
 
+.card-matches{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:8px 10px;
+  background:#FBFAF5;
+  border:1px solid #EFE6C8;
+  border-radius:6px;
+  font-size:11.5px;
+  line-height:1.4;
+}
+.match-title{
+  font-size:9.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--brass);
+  font-weight:600;
+}
+.match-row{ display:flex; gap:6px; align-items:baseline; }
+.match-label{ color:var(--ink-soft); flex-shrink:0; }
+.match-value{ color:var(--ink); font-weight:500; word-break:break-word; min-width:0; }
+mark.hl{
+  background:#FFE58A;
+  color:inherit;
+  padding:0 1px;
+  border-radius:2px;
+}
+
 .empty-state{
   text-align:center;
   padding:80px 20px;
@@ -913,19 +941,44 @@ function renderChips(){
 }
 
 /* ---------- grid ---------- */
+// the text a field shows on screen (so search matches what people actually see, e.g. "$250,000")
+function fieldText(k, v){
+  if(v === null || v === undefined || v === '') return '';
+  const f = formatField(k, v);
+  return String(f !== null && f !== undefined ? f : v);
+}
+
+// escape text for HTML, wrapping every case-insensitive match of the search term in <mark>
+function hl(text, term){
+  const t = (term || '').trim();
+  if(text === null || text === undefined) return '';
+  if(!t) return esc(text);
+  const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return String(text).split(re)
+    .map((part, i) => i % 2 === 1 ? `<mark class="hl">${esc(part)}</mark>` : esc(part))
+    .join('');
+}
+
 function matchesSearch(r, term){
-  if(!term) return true;
+  const t = (term || '').trim().toLowerCase();
+  if(!t) return true;
   // search across every entry on the project (builder, architect, stylist, phase, team, etc.)
-  const hay = Object.keys(r)
+  return Object.keys(r)
     .filter(k => k !== '_id')
-    .map(k => {
-      const v = r[k];
-      if(v === null || v === undefined) return '';
-      return String(formatField(k, v) ?? v);
-    })
-    .join(' ')
-    .toLowerCase();
-  return hay.includes(term.trim().toLowerCase());
+    .some(k => fieldText(k, r[k]).toLowerCase().includes(t));
+}
+
+// fields already shown (and highlighted) directly on the card face
+const CARD_FACE_FIELDS = ['Project Name','Address','Project Type','Current Phase','Project Manager - Name','Project Install Date','Team'];
+
+// matching fields that are NOT visible on the card face, so we can show where the hit was
+function searchHits(r, term){
+  const t = (term || '').trim().toLowerCase();
+  if(!t) return [];
+  return Object.keys(r)
+    .filter(k => k !== '_id' && !CARD_FACE_FIELDS.includes(k))
+    .map(k => ({ key:k, text:fieldText(k, r[k]) }))
+    .filter(h => h.text && h.text.toLowerCase().includes(t));
 }
 
 function renderGrid(){
@@ -952,22 +1005,33 @@ function renderGrid(){
     const install = val(r['Project Install Date']);
     const pm = val(r['Project Manager - Name']);
     const idx = DATA.indexOf(r);
+    const hits = searchHits(r, searchTerm);
+    const hitsHtml = hits.length ? `
+        <div class="card-matches">
+          <div class="match-title">Found in</div>
+          ${hits.map(h => `
+            <div class="match-row">
+              <span class="match-label">${esc(h.key.replace(' - Name',''))}:</span>
+              <span class="match-value">${hl(h.text, searchTerm)}</span>
+            </div>`).join('')}
+        </div>` : '';
     return `
       <div class="card" style="--card-line:${team.dot}" onclick="openSheet(${idx})">
         <div class="card-top">
-          <div class="card-name">${esc(r['Project Name'])}</div>
+          <div class="card-name">${hl(r['Project Name'], searchTerm)}</div>
           <div class="card-team" style="background:${team.fill}; color:${team.dot}">
-            <span class="dot" style="background:${team.dot}"></span>${esc(r.Team)}
+            <span class="dot" style="background:${team.dot}"></span>${hl(r.Team, searchTerm)}
           </div>
         </div>
-        ${r['Address'] ? `<div class="card-address">${esc(r['Address'])}</div>` : ''}
+        ${r['Address'] ? `<div class="card-address">${hl(r['Address'], searchTerm)}</div>` : ''}
         <div class="card-meta">
-          ${r['Project Type'] ? `<span class="tag">${esc(r['Project Type'])}</span>` : ''}
-          ${phase ? `<span class="tag phase">${esc(phase)}</span>` : ''}
+          ${r['Project Type'] ? `<span class="tag">${hl(r['Project Type'], searchTerm)}</span>` : ''}
+          ${phase ? `<span class="tag phase">${hl(phase, searchTerm)}</span>` : ''}
         </div>
+        ${hitsHtml}
         <div class="card-foot">
-          <span>${pm ? 'PM ' + esc(pm) : ''}</span>
-          <span class="install">${install ? esc(install) : '—'}</span>
+          <span>${pm ? 'PM ' + hl(pm, searchTerm) : ''}</span>
+          <span class="install">${install ? hl(install, searchTerm) : '—'}</span>
         </div>
       </div>
     `;
